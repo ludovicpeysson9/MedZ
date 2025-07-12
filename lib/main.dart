@@ -9,22 +9,47 @@ import 'utils/last_reset_date.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  final last = await LastResetDate.load();
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  if (last == null || last.isBefore(today)) {
-    await ChecksPersistence.clearAll();
-    await LastResetDate.saveToday();
-  }
-
   await NotificationService.init();
-
   runApp(const MedzApp());
 }
 
-class MedzApp extends StatelessWidget {
+class MedzApp extends StatefulWidget {
   const MedzApp({super.key});
+
+  @override
+  State<MedzApp> createState() => _MedzAppState();
+}
+
+class _MedzAppState extends State<MedzApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _maybeResetChecks();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _maybeResetChecks();
+    }
+  }
+
+  Future<void> _maybeResetChecks() async {
+    final last = await LastResetDate.load();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    if (last == null || last.isBefore(today)) {
+      await ChecksPersistence.clearAll();
+      await LastResetDate.saveToday();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,10 +61,7 @@ class MedzApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('fr'),
-        Locale('en'),
-      ],
+      supportedLocales: const [ Locale('fr'), Locale('en') ],
       routes: {
         '/settings': (c) => const SettingsScreen(),
       },
