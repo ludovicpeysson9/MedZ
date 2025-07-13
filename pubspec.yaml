@@ -80,6 +80,14 @@ flutter:
       - assets/images/background.png
       - assets/icons/pill.png
 
+  fonts:
+    - family: ArchiveBlack
+      fonts:
+        - asset: assets/fonts/ArchiveBlack.ttf
+    - family: KumarOne
+      fonts:
+        - asset: assets/fonts/KumarOne-Regular.ttf
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

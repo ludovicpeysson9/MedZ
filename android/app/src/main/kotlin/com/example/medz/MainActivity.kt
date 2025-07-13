@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings               // <-- import correct
+import android.provider.Settings               
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
@@ -43,10 +43,9 @@ class MainActivity : FlutterActivity() {
 
     private fun requestExactAlarmPermission() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
-        // ► constantes depuis android.provider.Settings
         val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
             putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
         }
-        startActivity(intent)   // ouvre la page « Alarmes & rappels »
+        startActivity(intent)   
     }
 }

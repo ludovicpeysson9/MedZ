@@ -9,6 +9,8 @@ import '../l10n/app_localizations.dart';
 import '../utils/context_extension.dart';
 import '../services/notification_service.dart';
 import '../utils/checks_persistence.dart';
+import '../utils/last_reset_date.dart';
+import '../widgets/custom_calendar.dart';
 
 class MedicationScreen extends StatefulWidget {
   const MedicationScreen({super.key});
@@ -17,7 +19,8 @@ class MedicationScreen extends StatefulWidget {
   State<MedicationScreen> createState() => _MedicationScreenState();
 }
 
-class _MedicationScreenState extends State<MedicationScreen> {
+class _MedicationScreenState extends State<MedicationScreen>
+    with WidgetsBindingObserver {
   List<Medication> medications = [];
 
   static const _donationUrl = 'https://buymeacoffee.com/ludovicpeysson';
@@ -27,6 +30,7 @@ class _MedicationScreenState extends State<MedicationScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadMedications();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -35,6 +39,30 @@ class _MedicationScreenState extends State<MedicationScreen> {
         body: context.loc.t(L10nKey.reminderBody),
       );
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkAndReset();
+    }
+  }
+
+  Future<void> _checkAndReset() async {
+    final last = await LastResetDate.load();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    if (last == null || last.isBefore(today)) {
+      await ChecksPersistence.clearAll();
+      await LastResetDate.saveToday();
+      _loadMedications();
+    }
   }
 
   Future<void> _loadMedications() async {
@@ -126,7 +154,9 @@ class _MedicationScreenState extends State<MedicationScreen> {
               ),
             ),
           ),
-
+          const SizedBox(height: 10),
+          Center(child: CustomCalendar(type: CalendarType.day)),
+          const SizedBox(height: 16),
           Expanded(
             child: Stack(
               fit: StackFit.expand,
