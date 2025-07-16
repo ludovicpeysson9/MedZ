@@ -31,14 +31,7 @@ class _MedicationScreenState extends State<MedicationScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _loadMedications();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      NotificationService.scheduleNotifications(
-        title: context.loc.t(L10nKey.reminder),
-        body: context.loc.t(L10nKey.reminderBody),
-      );
-    });
+    _initializeApp();
   }
 
   @override
@@ -54,20 +47,34 @@ class _MedicationScreenState extends State<MedicationScreen>
     }
   }
 
+  Future<void> _initializeApp() async {
+    await _checkAndReset();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationService.scheduleNotifications(
+        title: context.loc.t(L10nKey.reminder),
+        body: context.loc.t(L10nKey.reminderBody),
+      );
+    });
+  }
+
   Future<void> _checkAndReset() async {
     final last = await LastResetDate.load();
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
+    
     if (last == null || last.isBefore(today)) {
       await ChecksPersistence.clearAll();
       await LastResetDate.saveToday();
-      _loadMedications();
     }
+    
+    await _loadMedications();
   }
 
   Future<void> _loadMedications() async {
     final loaded = await MedicationService.loadMedications();
     final persisted = await ChecksPersistence.loadChecks();
+    
     setState(() {
       medications = loaded;
       checkStates.clear();
