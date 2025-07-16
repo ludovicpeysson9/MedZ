@@ -2,7 +2,7 @@
 
 **MedZ** est une application mobile gratuite et sans publicité pour suivre la prise de vos médicaments.
 
-**Date de la dernière version 14/07/2025**
+**Date de la dernière version 16/07/2025**
 
 ## Installation
 

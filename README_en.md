@@ -2,7 +2,7 @@
 
 **MedZ** is a free, ad-free mobile app to track your medication intake.
 
-**Date of the last release 14/07/2025**
+**Date of the last release 16/07/2025**
 
 ## Installation
 
